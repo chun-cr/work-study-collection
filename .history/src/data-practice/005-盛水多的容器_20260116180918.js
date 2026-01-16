@@ -1,0 +1,6 @@
+function maxArea(height){
+    let left = 0
+    let right = height.length -1
+    let area = 0
+    while(left < right)
+}

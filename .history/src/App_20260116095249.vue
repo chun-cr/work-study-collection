@@ -12,32 +12,6 @@ export default {
   name: 'App',
   components: {
     HelloWorld
-  },
-  created(){
-    console.log(this.$options.data)
-  },
-  props: {
-    initialValue: {
-      type: Number,
-      default: 0
-    }
-  },
-  data(){
-    console.log('data执行时的this:',this)
-    console.log(this === window)
-    console.log(this.$options.name)
-    console.log(typeof this.$emit)
-
-    console.log(this.initialValue)
-    return {
-      count: this.initialValue || 0,
-      timestamp: this.getCurrentTime()
-    }
-  },
-  methods:{
-    getCurrentTime(){
-      return Date.now()
-    }
   }
 }
 </script>
