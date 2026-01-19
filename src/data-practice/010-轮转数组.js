@@ -1,0 +1,21 @@
+// 给定一个整数数组 nums，将数组中的元素向右轮转 k 个位置，其中 k 是非负数。
+
+function rotate(nums, k){
+    let n = nums.length
+    k = k % n
+    reverse(nums, 0, n - 1)
+    reverse(nums, 0, k - 1)
+    reverse(nums, k , n - 1)
+}
+
+function reverse(nums,start,end){
+    while(start < end){
+        [nums[start],nums[end]] = [nums[end],nums[start]]
+        start++
+        end--
+    }
+}
+
+let nums1 = [1,2,3,4,5,6,7];
+rotate(nums1, 3);
+console.log(nums1);

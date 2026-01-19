@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #container{
+            height: 500px;
+            border: 2px solid #3408db;
+            overflow-y: auto;
+            position: relative;
+        }
+        #list{
+            position: relative;
+        }
+        .item{
+            height: 50;
+            line-height: 50px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h3>虚拟滚动示例：10000条数据</h3>
+    <div id="container">
+        <div id="list"></div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <div>当前渲染范围：<span id="range">0-0</span></div>
+        <div>实际渲染DOM数：<span id="count">0</span></div>
+        <div>总数据量：10000条</div>
+    </div>
+    
+</body>
+</html>
