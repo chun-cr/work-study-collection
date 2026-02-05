@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>JavaScript 股票指标 + ECharts 可视化</title>
+  <!-- 引入 ECharts CDN -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <style>
+    #stock-chart { width: 100%; height: 600px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>MA 移动平均线可视化</h1>
+  <div id="stock-chart"></div>
+
+  <script>
+    // 复用上面的 StockIndicator 工具类（完整复制到此处）
+    const StockIndicator = {
+      calculateMA: function (closeList, period) {
+        const maList = new Array(closeList.length).fill(null);
+        if (closeList.length < period) return maList;
+        let sum = 0;
+        for (let i = 0; i < period; i++) sum += closeList[i];
+        maList[period - 1] = Number((sum / period).toFixed(4));
+        for (let i = period; i < closeList.length; i++) {
+          sum = sum - closeList[i - period] + closeList[i];
+          maList[i] = Number((sum / period).toFixed(4));
+        }
+        return maList;
+      },
+      calculateEMA: function (closeList, period) {
+        const emaList = new Array(closeList.length).fill(null);
+        if (closeList.length === 0) return emaList;
+        const multiplier = 2 / (period + 1);
+        emaList[0] = Number(closeList[0].toFixed(4));
+        for (let i = 1; i < closeList.length; i++) {
+          emaList[i] = Number(
+            (closeList[i] * multiplier + emaList[i - 1] * (1 - multiplier)).toFixed(4)
+          );
+        }
+        return emaList;
+      },
+      calculateMACD: function (closeList, params = {}) {
+        const { fast = 12, slow = 26, signal = 9 } = params;
+        const result = { diff: new Array(closeList.length).fill(null), dea: new Array(closeList.length).fill(null), macd: new Array(closeList.length).fill(null) };
+        const emaFast = this.calculateEMA(closeList, fast);
+        const emaSlow = this.calculateEMA(closeList, slow);
+        for (let i = 0; i < closeList.length; i++) {
+          if (emaFast[i] && emaSlow[i]) result.diff[i] = Number((emaFast[i] - emaSlow[i]).toFixed(4));
+        }
+        const validDiff = result.diff.filter(item => item !== null);
+        if (validDiff.length > 0) {
+          const emaSignal = this.calculateEMA(validDiff, signal);
+          let diffIndex = 0;
+          for (let i = 0; i < closeList.length; i++) {
+            if (result.diff[i] !== null) {
+              result.dea[i] = emaSignal[diffIndex] || null;
+              diffIndex++;
+            }
+          }
+        }
+        for (let i = 0; i < closeList.length; i++) {
+          if (result.diff[i] && result.dea[i]) result.macd[i] = Number((2 * (result.diff[i] - result.dea[i])).toFixed(4));
+        }
+        return result;
+      }
+    };
+
+    // 1. 模拟数据
+    const mockCloseList = [
+      10.2, 10.5, 10.3, 10.7, 10.8, 11.0, 11.2, 11.1, 11.5, 11.7,
+      11.6, 11.9, 12.0, 12.2, 12.1, 12.5, 12.7, 12.6, 12.9, 13.0,
+      13.2, 13.1, 13.5, 13.7, 13.6, 13.9, 14.0, 14.2, 14.1, 14.5
+    ];
+    const dateList = mockCloseList.map((_, index) => `第 ${index+1} 天`); // 日期轴数据
+    const ma5 = StockIndicator.calculateMA(mockCloseList, 5);
+    const ma10 = StockIndicator.calculateMA(mockCloseList, 10);
+    const ma20 = StockIndicator.calculateMA(mockCloseList, 20);
+
+    // 2. 初始化 ECharts 图表
+    const myChart = echarts.init(document.getElementById('stock-chart'));
+
+    // 3. 配置图表选项
+    const option = {
+      title: { text: 'MA 5/10/20 日均线展示' },
+      tooltip: { trigger: 'axis' },
+      legend: { data: ['收盘价', 'MA5', 'MA10', 'MA20'] },
+      xAxis: {
+        type: 'category',
+        data: dateList
+      },
+      yAxis: {
+        type: 'value',
+        min: Math.min(...mockCloseList) - 0.5,
+        max: Math.max(...mockCloseList) + 0.5
+      },
+      series: [
+        { name: '收盘价', type: 'line', data: mockCloseList, lineStyle: { width: 2 } },
+        { name: 'MA5', type: 'line', data: ma5, color: '#009933' },
+        { name: 'MA10', type: 'line', data: ma10, color: '#ff6600' },
+        { name: 'MA20', type: 'line', data: ma20, color: '#ff0000' }
+      ]
+    };
+
+    // 4. 渲染图表
+    myChart.setOption(option);
+
+    // 窗口大小变化时，自适应图表
+    window.addEventListener('resize', () => myChart.resize());
+  </script>
+</body>
+</html>
